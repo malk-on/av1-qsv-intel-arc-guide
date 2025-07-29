@@ -1,13 +1,13 @@
 # AV1 QSV Encoding Guide for Intel Arc on Linux
 
-A complete and practical guide to encoding AV1 using Intel Arc GPUs (QSV) on Linux — with FFmpeg 7+, optimized filters, and real-world examples.
+A complete and practical guide to encoding AV1 using Intel Arc GPUs (QSV) on Linux, with FFmpeg 7+, optimized filters, and real-world examples.
 
 ---
 
 ## 🧠 Why this guide?
 
 This project aims to help Linux users take full advantage of Intel Arc GPUs for AV1 encoding using `av1_qsv`.  
-It's based on extensive testing with FFmpeg, real use cases, and performance comparisons — all done on a modest yet modern setup.
+It's based on extensive testing with FFmpeg, real use cases, and performance comparisons, all done on a modest yet modern setup.
 
 ---
 
