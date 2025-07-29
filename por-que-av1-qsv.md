@@ -16,10 +16,10 @@ Simples: o futuro é o AV1.
 
 Ele é aberto, sem royalties, e cada vez mais suportado por navegadores, plataformas, TVs e streamings como YouTube e Netflix. Ao contrário do HEVC, que tem problemas com patentes, e do AVC, que já está ultrapassado em eficiência.
 
-Além disso, o AV1 entrega mais qualidade com menos bitrate, o que reduz o tamanho dos arquivos e facilita uploads, armazenamento e distribuição — especialmente em redes com banda limitada.
+Além disso, o AV1 entrega mais qualidade com menos bitrate, o que reduz o tamanho dos arquivos e facilita uploads, armazenamento e distribuição, especialmente em redes com banda limitada.
 
 ---
 
 ## Conclusão
 
-Com encoders por hardware como o QSV da Intel Arc, o AV1 deixou de ser algo “lento” ou “experimental”. Agora é acessível, viável e altamente eficiente — até pra quem não tem uma máquina monstruosa.
+Com encoders por hardware como o QSV da Intel Arc, o AV1 deixou de ser algo “lento” ou “experimental”. Agora é acessível, viável e altamente eficiente, até pra quem não tem uma máquina monstruosa.
