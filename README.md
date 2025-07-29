@@ -140,6 +140,14 @@ ffmpeg \
 📺 [Configuração recomendada do mpv no Windows](./mpv-config-windows.md)
 
 
+
+## Por que escolhi AV1 com QSV?
+
+Veja a explicação completa sobre minha escolha por AV1 com QSV em vez de SVT-AV1, HEVC ou AVC:
+
+👉 [por-que-av1-qsv.md](./por-que-av1-qsv.md)
+
+
   
 
 
