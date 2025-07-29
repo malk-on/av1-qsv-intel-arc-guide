@@ -148,6 +148,15 @@ Veja a explicação completa sobre minha escolha por AV1 com QSV em vez de SVT-A
 👉 [por-que-av1-qsv.md](./por-que-av1-qsv.md)
 
 
+## ⚠️ Observações sobre decodificação QSV e VAAPI
+
+- **Decodificação AVC (H.264):** Até o momento, **não é possível usar QSV ou VAAPI para decodificação de vídeos AVC (8 e 10 bits) durante o processo de encoding com av1_qsv**.  
+- **Decodificação HEVC e AV1:** Para fontes HEVC (8/10 bits) e AV1, a decodificação via QSV/VAAPI funciona corretamente e pode ser usada para acelerar o processamento.  
+- **Reprodução com MPV:** Apesar da limitação acima para encoding, **o VAAPI pode ser utilizado para decodificação de AVC 8 bits na reprodução via MPV**, mas AVC 10 bits com VAAPI ainda não está suportado.  
+- **Recomendação prática:** Para evitar erros e garantir estabilidade no encoding AV1 via QSV, prefira usar **decodificação por software para fontes AVC**.  
+- Essas descobertas foram testadas e confirmadas no ambiente Fedora 42 KDE com Intel Arc A310 e FFmpeg 7.1.1.
+
+
   
 
 
