@@ -157,6 +157,7 @@ Veja a explicação completa sobre minha escolha por AV1 com QSV em vez de SVT-A
 - Essas descobertas foram testadas e confirmadas no ambiente Fedora 42 KDE com Intel Arc A310 e FFmpeg 7.1.1.
 
 
+⚠️ Nota: Todas as observações sobre a incompatibilidade de avc_qsv e vaapi referem-se exclusivamente ao ambiente Linux com placas Intel Arc. Ainda não realizei testes no Windows, onde o suporte pode ser diferente e mais completo, especialmente com os drivers oficiais da Intel.
   
 
 
