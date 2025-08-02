@@ -73,32 +73,36 @@ format=p010le" \
 
 ###▶️ Para fontes HEVC 8 bits
 ```bash
-ffmpeg -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ffmpeg \
+  -init_hw_device qsv=hw:/dev/dri/renderD128 \
+  -filter_hw_device hw \
   -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
   -i "/run/media/malk/Downloads/input.mkv" \
-  -vf "format=yuv420p, zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=tv, format=p010le" \
+  -vf "hwdownload,format=yuv420p, \
+       zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=tv, \
+       format=p010le,hwupload=extra_hw_frames=64,format=qsv" \
   -map 0:v:0 -c:v av1_qsv \
-  -global_quality 24 -preset veryslow \
-  -extbrc 1 -look_ahead_depth 40 \
-  -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-  -tile_cols 2 -tile_rows 1 \
-  -forced_idr 1 \
+    -global_quality 24 -preset veryslow \
+    -extbrc 1 -look_ahead_depth 40 \
+    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
+    -tile_cols 2 -tile_rows 1 \
+    -forced_idr 1 \
   -an \
   "/run/media/malk/Downloads/output_av1_qsv_main10_q24.mkv"
 ```
 
 ###▶️ Para fontes HEVC 10 bits
 ```bash
-ffmpeg -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ffmpeg \
+  -init_hw_device qsv=hw:/dev/dri/renderD128 \
   -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
   -i "/run/media/malk/Downloads/input.mkv" \
-  -vf "zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=tv, format=p010le" \
   -map 0:v:0 -c:v av1_qsv \
-  -global_quality 24 -preset veryslow \
-  -extbrc 1 -look_ahead_depth 40 \
-  -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-  -tile_cols 2 -tile_rows 1 \
-  -forced_idr 1 \
+    -global_quality 24 -preset veryslow \
+    -extbrc 1 -look_ahead_depth 40 \
+    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
+    -tile_cols 2 -tile_rows 1 \
+    -forced_idr 1 \
   -an \
   "/run/media/malk/Downloads/output_av1_qsv_main10_q24.mkv"
 ```
