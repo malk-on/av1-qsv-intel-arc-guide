@@ -51,20 +51,17 @@ ffmpeg \
 ▶️ Fontes AVC 10-bit (H.264):
 ```bash
 ffmpeg \
-  -init_hw_device qsv=hw:/dev/dri/renderD128 \
-  -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
-  -i "/caminho/do/seu/input.mkv" \
-  -vf "format=yuv420p,\
-zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=limited,\
-format=p010le" \
-  -map 0:v:0 -c:v av1_qsv \
-    -global_quality 24 -preset veryslow \
-    -extbrc 1 -look_ahead_depth 40 \
-    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-    -tile_cols 2 -tile_rows 1 \
-    -forced_idr 1 \
-  -an \
-  "/caminho/do/seu/output_av1_qsv_main10_q24.mkv"
+ -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ -i "/run/media/malk/Downloads/input.mkv" \
+ -vf "format=p010le" \
+ -map 0:v:0 -c:v av1_qsv \
+   -global_quality 24 -preset veryslow \
+   -extbrc 1 -look_ahead_depth 40 \
+   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
+   -tile_cols 2 -tile_rows 1 \
+   -forced_idr 1 \
+ -an \
+ "/run/media/malk/Downloads/output_av1_qsv_main10_q24.mkv"
 ```
 
 ▶️ Fontes HEVC 8-bit:
