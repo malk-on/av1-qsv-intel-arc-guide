@@ -135,7 +135,8 @@ Todos os testes foram feitos com decodificação por software no caso do AVC, e 
 Arquivos gerados rodam suave em players modernos.
 
 👉 Se quiser, também recomendo dar uma olhada no meu preset pro MPV no Windows:
-mpv-config-windows.md
+
+📺 [Configuração recomendada do mpv no Windows](mpv-config-windows.md)
 
 
 ⚠️ Observações sobre decodificação:
@@ -158,7 +159,7 @@ Nota: Esses testes foram no Fedora 42 KDE com a Arc A310. No Windows o comportam
 
 Se quiser entender direitinho o porquê da minha escolha de AV1 com QSV (ao invés de SVT-AV1, HEVC, AVC…), tem um texto separado só pra isso:
 
-👉 por-que-av1-qsv.md
+👉 [Por que escolhi AV1 com QSV](por-que-av1-qsv.md)
 
 
 
