@@ -34,70 +34,72 @@ O global_quality também vale a pena ajustar conforme sua fonte e necessidade.
 ▶️ Fontes AVC 8-bit (H.264):
 ```bash
 ffmpeg \
-  -init_hw_device qsv=hw:/dev/dri/renderD128 \
-  -color_primaries bt709 -color_trc bt709 -colorspace bt709 \
-  -i "/caminho/do/seu/input.mkv" \
-  -vf "zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=limited,format=p010le" \
-  -map 0:v:0 -c:v av1_qsv \
-    -global_quality 24 -preset veryslow \
-    -extbrc 1 -look_ahead_depth 40 \
-    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-    -tile_cols 2 -tile_rows 1 \
-    -forced_idr 1 \
-  -an \
-  "/caminho/do/seu/output_av1_qsv_main10_q24.mkv"
+ -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ -filter_hw_device hw \
+ -hwaccel qsv -hwaccel_output_format qsv -c:v h264_qsv \
+ -i "/run/media/malk/Downloads/input.mkv" \
+ -map 0:v:0 \
+ -vf "format=qsv,scale_qsv=format=p010" \
+ -c:v av1_qsv \
+   -preset veryslow \
+   -global_quality 24 \
+   -look_ahead_depth 100 \
+   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
+   -extbrc 1 -g 300 -forced_idr 1 \
+   -tile_cols 0 -tile_rows 0 \
+ -an \
+ "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv""
 ```
 
 ▶️ Fontes AVC 10-bit (H.264):
 ```bash
 ffmpeg \
- -init_hw_device qsv=hw:/dev/dri/renderD128 \
  -i "/run/media/malk/Downloads/input.mkv" \
- -vf "format=p010le" \
  -map 0:v:0 -c:v av1_qsv \
-   -global_quality 24 -preset veryslow \
-   -extbrc 1 -look_ahead_depth 40 \
-   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-   -tile_cols 2 -tile_rows 1 \
-   -forced_idr 1 \
- -an \
- "/run/media/malk/Downloads/output_av1_qsv_main10_q24.mkv"
+   -preset veryslow \
+   -global_quality 24 \
+   -look_ahead_depth 100 \
+   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
+   -extbrc 1 -g 300 -forced_idr 1 \
+   -tile_cols 0 -tile_rows 0 \
+  -an \
+ "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv""
 ```
 
 ▶️ Fontes HEVC 8-bit:
 ```bash
 ffmpeg \
-  -init_hw_device qsv=hw:/dev/dri/renderD128 \
-  -filter_hw_device hw \
-  -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
-  -i "/caminho/do/seu/input.mkv" \
-  -vf "hwdownload,format=yuv420p, \
-       zscale=transfer=bt709:primaries=bt709:matrix=bt709:range=tv, \
-       format=p010le,hwupload=extra_hw_frames=64,format=qsv" \
-  -map 0:v:0 -c:v av1_qsv \
-    -global_quality 24 -preset veryslow \
-    -extbrc 1 -look_ahead_depth 40 \
-    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-    -tile_cols 2 -tile_rows 1 \
-    -forced_idr 1 \
-  -an \
-  "/caminho/do/seu/output_av1_qsv_main10_q24.mkv"
+ -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ -filter_hw_device hw \
+ -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
+ -i "/run/media/malk/Downloads/input.mkv" \
+ -map 0:v:0 -c:v av1_qsv \
+   -preset veryslow \
+   -global_quality 24 \
+   -look_ahead_depth 100 -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
+   -extbrc 1 -g 300 -forced_idr 1 \
+   -tile_cols 0 -tile_rows 0 \
+   -pix_fmt yuv420p10le \
+ -an \
+ "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
 ```
 
 ▶️ Fontes HEVC 10-bit:
 ```bash
 ffmpeg \
-  -init_hw_device qsv=hw:/dev/dri/renderD128 \
-  -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
-  -i "/caminho/do/seu/input.mkv" \
-  -map 0:v:0 -c:v av1_qsv \
-    -global_quality 24 -preset veryslow \
-    -extbrc 1 -look_ahead_depth 40 \
-    -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 7 \
-    -tile_cols 2 -tile_rows 1 \
-    -forced_idr 1 \
-  -an \
-  "/caminho/do/seu/output_av1_qsv_main10_q24.mkv"
+ -init_hw_device qsv=hw:/dev/dri/renderD128 \
+ -filter_hw_device hw \
+ -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
+ -i "/run/media/malk/Downloads/input.mkv" \
+ -map 0:v:0 -c:v av1_qsv \
+   -preset veryslow \
+   -global_quality 24 \
+   -look_ahead_depth 100 \
+   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
+   -extbrc 1 -g 300 -forced_idr 1 \
+   -tile_cols 0 -tile_rows 0 \
+ -an \
+ "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
 ```
 
 🎧 Mux de Áudio com libopus:
@@ -105,22 +107,22 @@ ffmpeg \
 Faixa única (primeiro áudio do input):
 ```bash
 ffmpeg \
-  -i "/caminho/do/seu/output_av1_qsv_main10_q24.mkv" \
-  -i "/caminho/do/seu/input.mkv" \
+  -i "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"\
+  -i "/run/media/malk/Downloads/input.mkv" \
   -map 0:v:0 -c:v copy \
-  -map 1:a:0 -c:a libopus -b:a 96k \
-  "/caminho/do/seu/output_final_q24_opus96k.mkv"
+  -map 1:a:0 -c:a libopus -vbr off -b:a 96k \
+  "/run/media/malk/Downloads/output_qsv_final_q24_opus96k.mkv"
 ```
 
 Dual áudio (faixas 0 e 1 do input):
 ```bash
 ffmpeg \
-  -i "/caminho/do/seu/output_av1_qsv_main10_q24.mkv" \
-  -i "/caminho/do/seu/input.mkv" \
+  -i "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv" \
+  -i "/run/media/malk/Downloads/input.mkv" \
   -map 0:v:0 -c:v copy \
-  -map 1:a:0 -c:a:0 libopus -b:a:0 96k -metadata:s:a:0 title="Japonês[Malk]" \
-  -map 1:a:1 -c:a:1 libopus -b:a:1 96k -metadata:s:a:1 title="Português[Malk]" \
-  "/caminho/do/seu/output_dualaudio_q24_opus96k.mkv"
+  -map 1:a:0 -c:a:0 libopus -vbr off -b:a:0 96k -metadata:s:a:0 title="Japonês[Malk]" \
+  -map 1:a:1 -c:a:1 libopus -vbr off -b:a:1 96k -metadata:s:a:1 title="Português[Malk]" \
+  "/run/media/malk/Downloads/output_qsv_dualaudio_q24_opus96k.mkv"
 ```
 
 🧠 Notas finais:
