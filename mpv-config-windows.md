@@ -1,79 +1,79 @@
-# Configuração do mpv no Windows
+Configuração do mpv no Windows (atualizada)
 
-Faz tempo que uso o mpv no Linux, com várias configurações que ajustei depois de testar bastante pra não estragar o traço do vídeo e manter uma boa qualidade na imagem.
+Eu uso o mpv no Linux faz tempo, sempre ajustando a imagem pra manter o traço limpo e natural, sem deixar nada artificial. Depois de muito teste, cheguei numa configuração que considero estável e de qualidade máxima.
 
-No Linux, meu mpv roda via Flatpak com configs personalizadas que usam Vulkan, filtros top de escalonamento e debanding, e outras coisas que deixam a imagem melhor, sem perder a naturalidade.
+A boa notícia é que dá pra usar praticamente o mesmo setup no Windows, muda só a parte de instalação e onde salvar o arquivo de configuração.
 
-Mas aí pensei: será que dá pra replicar isso no Windows? Para a galera que costuma ver re-encodes lá? Porque cada player, sistema e hardware muda um pouco o visual.
+Como instalar o mpv no Windows
 
-Então fiz uns testes e vou contar o que funciona e o que não funciona, pra quem quiser usar mpv no Windows com configuração parecida, aproveitando o que dá.
+Você pode baixar uma versão já compilada do mpv direto no SourceForge:
 
-## Como instalar o mpv no Windows
+https://sourceforge.net/projects/mpv-player-windows/
 
-Você pode baixar o mpv já pronto no SourceForge, que tem versões atualizadas que funcionam bem no Windows:
+Outra opção é instalar pelo Scoop ou Chocolatey (gerenciadores de pacotes), que deixam mais fácil atualizar depois.
 
-👉 [https://sourceforge.net/projects/mpv-player-windows/](https://sourceforge.net/projects/mpv-player-windows/)
+Onde fica o arquivo de configuração?
 
-Também dá pra instalar pelo **Scoop** ou **Chocolatey**, que são gerenciadores de pacotes e facilitam atualizar depois.
+No Windows, o arquivo fica aqui:
 
-## Onde fica o arquivo de configuração?
-
-Depois de instalado, o arquivo principal pra configurar o mpv no Windows é:
-
+```bash
 C:\Users\SeuUsuario\AppData\Roaming\mpv\mpv.conf
+```
 
+Basta abrir esse arquivo no Bloco de Notas ou em outro editor (VSCode, Notepad++ etc.) e colar a configuração abaixo.
 
-É só abrir esse arquivo num editor de texto (Notepad, VSCode, etc) e colar as configurações.
+Configuração recomendada (mpv.conf)
 
-## Configuração recomendada para Windows (mpv.conf)
-
-```conf
-vo=gpu
-gpu-api=d3d11
+```bash
+# Decodificação acelerada por hardware
 hwdec=auto
 
+# Renderer em Direct3D 11 (mais estável no Windows)
+vo=gpu-next
+gpu-api=d3d11
+gpu-context=auto
+
+# Escalonadores de alta qualidade
 scale=ewa_lanczossharp
-cscale=ewa_lanczossharp
+cscale=ewa_lanczos
 dscale=mitchell
 tscale=oversample
+sigmoid-upscaling=yes
+sigmoid-slope=6
 
+# Debanding + microgrão para suavizar artefatos
 deband=yes
 deband-iterations=2
 deband-threshold=48
-deband-grain=0
+deband-grain=2
 
+# Dither + framebuffer em alta precisão
 dither-depth=auto
 temporal-dither=yes
 fbo-format=rgba16f
 
-# video-aspect-override=16:9
-# video-unscaled=no
 ```
-Obs: as duas últimas linhas estão comentadas para manter o aspecto original (4:3 ou 16:9 conforme o vídeo). No Linux eu costumo forçar pra esticar 4:3 em 16:9, mas no Windows recomendo deixar como está.
 
-Sobre a aceleração por hardware
+O que cada parte faz (em resumo)
 
-* Intel (incluindo Arc): hwdec=auto funciona bem
+* hwdec=auto → usa aceleração de vídeo da sua placa (Intel, AMD ou Nvidia). Se der problema, dá pra trocar por hwdec=no.
 
-* Nvidia: hwdec=auto ativa NVDEC/NVENC
+* vo=gpu-next + gpu-api=d3d11 → manda o mpv usar Direct3D 11, que é o mais compatível no Windows.
 
-* AMD: idem
+* scale / cscale / dscale / tscale → controlam como o vídeo é redimensionado (quando não é 1080p/4K nativo). O resultado é mais nítido e sem serrilhado.
 
-* Sem aceleração: use hwdec=no para forçar o uso da CPU
+* sigmoid-upscaling → evita aquele efeito “lavado” quando a imagem é ampliada.
+
+* deband → remove faixas feias em gradientes (céu, sombras, paredes). O grain=2 adiciona um leve microgrão pra deixar a imagem natural, sem aparência plástica.
+
+* dither / fbo-format → ajudam a manter a suavidade das cores em monitores de qualquer profundidade de bits.
+
+
 
 Considerações finais
 
-Fiz esses ajustes testando com os mesmos vídeos que uso no Linux, rodando mpv no Windows, pra ter uma base visual parecida.
+Essa configuração é “set and forget”: você só precisa colar no mpv.conf e usar.
 
-Não fica 100% igual (por causa das diferenças de drivers e APIs), mas a imagem não perde qualidade e nem fica artificial.
+Não muda a cor nem o traço do anime/filme, apenas remove defeitos visíveis e melhora a nitidez, deixando tudo mais próximo da experiência de assistir no Linux com as configs avançadas.
 
-
-
-🧩 A configuração que uso no mpv é o que fecha o pacote do meu encode.
-
-Como o encode tem limitações naturais (por causa do tamanho do arquivo e do uso do QSV), rolar uns artefatos é normal.
-
-Mas com os filtros de escala, debanding e dithering que coloquei no mpv, a imagem fica mais suave, o traço é preservado e os defeitos visíveis somem ou ficam bem menos incômodos.
-
-No fim das contas, a config do mpv ajuda a entregar uma experiência visual bem melhor, compensando as limitações técnicas do encode e deixando tudo redondinho pra quem assiste.
-
+No fim das contas, é como se o mpv desse o último “polimento” na imagem, compensando pequenas limitações do encode e garantindo uma experiência visual melhor.
