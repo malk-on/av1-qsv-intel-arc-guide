@@ -19,7 +19,7 @@ Sistema de testes
 
 Caminhos de exemplo:
 
-Os caminhos que aparecem abaixo (/run/media/malk/Downloads/input.mkv etc.) são exemplos reais que eu uso — mantenha as aspas e ajuste pro seu local.
+Os caminhos que aparecem abaixo (/run/media/malk/Downloads/input.mkv etc.) são exemplos reais que eu uso, mantenha as aspas e ajuste pro seu local.
 
 O -global_quality merece teste: ajuste conforme sua fonte e objetivo (qualidade vs tamanho).
 
