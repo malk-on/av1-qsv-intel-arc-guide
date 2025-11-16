@@ -187,7 +187,7 @@ Como alguns players ainda variam no suporte ao AV1, abaixo estão as recomendaç
 Android:
 - VLC: funciona direto, simples e confiável.
 - mpv (F-Droid): maior fidelidade, requer ajustes manuais.
-- mpvKt: versão moderna do mpv para Android; reproduz AV1 liso sem configurar nada.
+- mpvKt: versão moderna do mpv para Android, reproduz AV1 liso sem configurar nada.
 
 Windows / PC:
 - VLC: compatibilidade ampla.
@@ -203,7 +203,7 @@ Para garantir compatibilidade ampla, todos os encodes são testados em dois disp
 - Samsung Galaxy A30s: roda AV1 totalmente por software (VLC e mpvKt).
 - Positivo Motion Q232B: notebook simples, formatado com drivers originais.
 
-Se o AV1_QSV roda liso nesses aparelhos — que não possuem aceleração AV1 — 
+Se o AV1_QSV roda liso nesses aparelhos, que não possuem aceleração AV1, 
 ele rodará sem problemas em praticamente qualquer hardware atual.
 
 ```
