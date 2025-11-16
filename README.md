@@ -122,7 +122,7 @@ ffmpeg \
 
 🧠 Notas finais:
 
-* Para fontes AVC (H.264): prefira decodificação por software — QSV para decodificação AVC pode falhar em várias fontes. Use -i input.mkv sem -hwaccel qsv quando a origem for AVC.
+* Para fontes AVC (H.264): prefira decodificação por software, QSV para decodificação AVC pode falhar em várias fontes. Use -i input.mkv sem -hwaccel qsv quando a origem for AVC.
 
 * Para HEVC/AV1: decodificação por QSV costuma funcionar bem em Arc. Testei isso no meu setup (Fedora + Arc A310).
 
@@ -130,7 +130,7 @@ ffmpeg \
 
 * -global_quality é o principal controle de qualidade: experimente na prática (valores típicos que eu testo: ~18 = mais qualidade / pesado, até ~30 = mais compacto). Ajuste pra sua fonte.
 
-* -look_ahead_depth, -adaptive_i, -adaptive_b, -b_strategy, -bf e -extbrc são parâmetros que otimizei pra Arc — podem ser reduzidos se você precisar de encode mais rápido.
+* -look_ahead_depth, -adaptive_i, -adaptive_b, -b_strategy, -bf e -extbrc são parâmetros que otimizei pra Arc, podem ser reduzidos se você precisar de encode mais rápido.
 
 * -g 300 e -forced_idr 1 funcionam bem pra controle de GOP em animes/filmes, mas ajuste conforme sua timeline de capítulos/cenas.
 
@@ -140,7 +140,7 @@ ffmpeg \
 
 * Sempre verifique sua versão do FFmpeg e drivers (OneVPL/iHD). Pequenas versões mudam comportamento do av1_qsv.
 
-* Teste em pequenos cortes primeiro (10–30s) antes de rodar o arquivo inteiro — economiza tempo ao ajustar -global_quality.
+* Teste em pequenos cortes primeiro (10–30s) antes de rodar o arquivo inteiro, economiza tempo ao ajustar -global_quality.
 
 * QSV aceita apenas YUV420. Se sua fonte for 4:2:2 ou 4:4:4, faça a conversão antes:
 -vf format=yuv420p10le (ou yuv420p para 8-bit).
@@ -166,7 +166,7 @@ No Linux com placas Intel Arc, rolou o seguinte nos testes:
 | AV1 8/10-bit       | ❌ Instável no pipeline QSV    | ❌ Instável no pipeline QSV | Use `-hwaccel none` |
 
 
-*Resumo: usando Arc no Linux, o mais seguro e estável é sempre decodificar por software. Use QSV apenas na parte de encode.
+Resumo: usando Arc no Linux, o mais seguro e estável é sempre decodificar por software. Use QSV apenas na parte de encode.
 
 Nota: Esses testes foram no Fedora 43 KDE com a Arc A310. No Windows o comportamento pode ser diferente, principalmente com driver Intel oficial.
 
@@ -178,7 +178,35 @@ Se quiser entender direitinho o porquê da minha escolha de AV1 com QSV (ao inv�
 
 * Nota Final: Todas as informações abaixo foram testadas na prática no Fedora 43 KDE, Fmpeg 7.1.1 e GPU Intel Arc A310. Muitos desses comportamentos não estão, documentados oficialmente, mas foram verificados de forma consistente em, dezenas de encodes.
 
+```bash
+# Compatibilidade de Reprodução, Players Recomendados e Metodologia de Testes
 
+Os encodes usam AV1 via QSV, mais leve e rápido que SVT-AV1, com pequena perda de eficiência.
+Como alguns players ainda variam no suporte ao AV1, abaixo estão as recomendações de reprodução.
+
+Android:
+- VLC: funciona direto, simples e confiável.
+- mpv (F-Droid): maior fidelidade, requer ajustes manuais.
+- mpvKt: versão moderna do mpv para Android; reproduz AV1 liso sem configurar nada.
+
+Windows / PC:
+- VLC: compatibilidade ampla.
+- K-Lite Codec Pack (MPC-HC): alternativa intermediária, testado no Positivo Q232B.
+- mpv: player mais fiel ao encode, ideal para validar qualidade.
+
+---------------------------------------------------------------------
+
+Metodologia de Testes:
+
+Para garantir compatibilidade ampla, todos os encodes são testados em dois dispositivos modestos:
+
+- Samsung Galaxy A30s: roda AV1 totalmente por software (VLC e mpvKt).
+- Positivo Motion Q232B: notebook simples, formatado com drivers originais.
+
+Se o AV1_QSV roda liso nesses aparelhos — que não possuem aceleração AV1 — 
+ele rodará sem problemas em praticamente qualquer hardware atual.
+
+```
 
 
 
