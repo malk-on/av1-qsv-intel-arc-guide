@@ -126,7 +126,7 @@ ffmpeg \
 
 * Para HEVC/AV1: decodificação por QSV costuma funcionar bem em Arc. Testei isso no meu setup (Fedora + Arc A310).
 
- * Se a sua fonte for 8→10 bits (ou vice-versa), cuidado com scale_qsv=format=p010 / -pix_fmt yuv420p10le — preserve o formato correto pra evitar banding/desbalanceamento de cores.
+ * Se a sua fonte for 8→10 bits (ou vice-versa), cuidado com scale_qsv=format=p010 / -pix_fmt yuv420p10le  preserve o formato correto pra evitar banding/desbalanceamento de cores.
 
 * -global_quality é o principal controle de qualidade: experimente na prática (valores típicos que eu testo: ~18 = mais qualidade / pesado, até ~30 = mais compacto). Ajuste pra sua fonte.
 
