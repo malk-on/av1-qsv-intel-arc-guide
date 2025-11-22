@@ -66,15 +66,16 @@ ffmpeg \
 ffmpeg \
  -init_hw_device qsv=hw:/dev/dri/renderD128 \
  -filter_hw_device hw \
- -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
  -i "/run/media/malk/Downloads/input.mkv" \
- -map 0:v:0 -c:v av1_qsv \
+ -map 0:v:0 \
+ -vf "hwupload=extra_hw_frames=64,format=qsv,scale_qsv=format=p010" \
+ -c:v av1_qsv \
    -preset veryslow \
    -global_quality 24 \
-   -look_ahead_depth 100 -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
+   -look_ahead_depth 100 \
+   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
    -extbrc 1 -g 300 -forced_idr 1 \
    -tile_cols 0 -tile_rows 0 \
-   -pix_fmt yuv420p10le \
  -an \
  "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
 ```
@@ -161,8 +162,8 @@ No Linux com placas Intel Arc, rolou o seguinte nos testes:
 |--------------------|---------------|------------------|-------------|
 | AVC 8-bit          | ❌ Instável   | ⚠️ Apenas reprodução (MPV) | Use `-hwaccel none` |
 | AVC 10-bit         | ❌ Não suportado | ❌ Não suportado | Use `-hwaccel none` |
-| HEVC 8-bit         | ✅ Sim        | ✅ Sim           | Estável e rápido |
-| HEVC 10-bit        | ✅ Sim        | ✅ Sim           | Ideal para pipelines QSV |
+| HEVC 8-bit         | ❌ Instável   | Apenas reprodução (MPV)   | Use `-hwaccel none` |
+| HEVC 10-bit        | ✅ Sim        | ✅ Sim         | Ideal para pipelines QSV |
 | AV1 8/10-bit       | ❌ Instável no pipeline QSV    | ❌ Instável no pipeline QSV | Use `-hwaccel none` |
 
 
