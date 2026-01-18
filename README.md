@@ -1,40 +1,44 @@
-🎬 AV1 QSV — Guia prático para Intel Arc no Linux
+**AV1 QSV - Guia prático para Intel Arc no Linux.**
 
-Um guia direto ao ponto pra extrair o máximo do AV1 usando Intel Arc (QSV) no Linux. Baseado em testes reais, exemplos de uso do dia a dia e filtros ajustados para FFmpeg 7+.
-A ideia é: facilitar a vida de quem quer boa qualidade e desempenho sem ficar perdido na documentação oficial.
+Um guia direto ao ponto para extrair o máximo do AV1 usando Intel Arc via QSV no Linux,
+tudo aqui é baseado em testes reais, uso no dia a dia e ajustes práticos para FFmpeg 7+,
+a ideia é simples, boa qualidade e bom desempenho sem ficar perdido na documentação oficial.
 
-Sistema de testes
+**Sistema de testes:**
 
-* Distro: Fedora 42 KDE
+Todo o comportamento descrito neste guia foi testado no ambiente abaixo.
 
-* Kernel: 6.14.11
+**Distro:** Fedora 43 KDE
 
-* GPU: Intel Arc A310
+**Kernel:** 6.14.11
 
-* CPU: Ryzen 5 4600G
+**GPU:** Intel Arc A310
 
-* FFmpeg: 7.1.1
+**CPU:** Ryzen 5 4600G
 
-* Driver stack: Intel Media Driver (iHD) + OneVPL
+**FFmpeg:** 7.1.2
 
-Caminhos de exemplo:
-
-Os caminhos que aparecem abaixo (/run/media/malk/Downloads/input.mkv etc.) são exemplos reais que eu uso, mantenha as aspas e ajuste pro seu local.
-
-O -global_quality merece teste: ajuste conforme sua fonte e objetivo (qualidade vs tamanho).
+Driver stack: Intel Media Driver (iHD) + OneVPL
 
 
-* Importante: decodificação por QSV para AVC é instável no Linux com Intel Arc.
-Por isso, sempre use decodificação por software em fontes H.264, mesmo as 8-bit.
+**Caminhos de exemplo:**
 
-▶️ Fontes AVC 8-bit (H.264):
+Os caminhos usados nos comandos (/run/media/malk/Downloads/input.mkv etc.) são exemplos reais do meu setup,
+Mantenha as aspas e ajuste os caminhos conforme o seu ambiente.
+
+**Comandos base:**
+
+Abaixo estão os dois comandos base que uso no dia a dia,
+eles cobrem fontes AVC, HEVC e AV1, a única diferença entre eles é a profundidade de bits da fonte.
+
+Para fontes AVC, HEVC e AV1 8 bits:
+
 ```bash
 ffmpeg \
- -init_hw_device qsv=hw:/dev/dri/renderD128 \
- -filter_hw_device hw \
  -i "/run/media/malk/Downloads/input.mkv" \
  -map 0:v:0 \
- -vf "hwupload=extra_hw_frames=64,format=qsv,scale_qsv=format=p010" \
+ -vf "format=p010le" \
+ -pix_fmt p010le \
  -c:v av1_qsv \
    -preset veryslow \
    -global_quality 24 \
@@ -46,7 +50,9 @@ ffmpeg \
  "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
 ```
 
-▶️ Fontes AVC 10-bit (H.264):
+
+Para fontes AVC, HEVC e AV1 10 bits:
+
 ```bash
 ffmpeg \
  -i "/run/media/malk/Downloads/input.mkv" \
@@ -61,155 +67,194 @@ ffmpeg \
  "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
 ```
 
-▶️ Fontes HEVC 8-bit:
-```bash
-ffmpeg \
- -init_hw_device qsv=hw:/dev/dri/renderD128 \
- -filter_hw_device hw \
- -i "/run/media/malk/Downloads/input.mkv" \
- -map 0:v:0 \
- -vf "hwupload=extra_hw_frames=64,format=qsv,scale_qsv=format=p010" \
- -c:v av1_qsv \
-   -preset veryslow \
-   -global_quality 24 \
-   -look_ahead_depth 100 \
-   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
-   -extbrc 1 -g 300 -forced_idr 1 \
-   -tile_cols 0 -tile_rows 0 \
- -an \
- "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
-```
+**Nota sobre profundidade de bits e decodificação:**
 
-▶️ Fontes HEVC 10-bit:
-```bash
-ffmpeg \
- -init_hw_device qsv=hw:/dev/dri/renderD128 \
- -filter_hw_device hw \
- -hwaccel qsv -hwaccel_output_format qsv -c:v hevc_qsv \
- -i "/run/media/malk/Downloads/input.mkv" \
- -map 0:v:0 -c:v av1_qsv \
-   -preset veryslow \
-   -global_quality 24 \
-   -look_ahead_depth 100 \
-   -adaptive_i 1 -adaptive_b 1 -b_strategy 1 -bf 8 \
-   -extbrc 1 -g 300 -forced_idr 1 \
-   -tile_cols 0 -tile_rows 0 \
- -an \
- "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"
-```
+Em fontes 8 bits faço conversão explícita para 10 bits usando tanto -vf "format=p010le" quanto -pix_fmt p010le para garantir conversão explícita e evitar qualquer negociação automática para 8 bits, isso reduz banding e melhora a estabilidade visual no AV1, já em fontes HEVC 10 bits esse é o único cenário onde uso decodificação acelerada via QSV, todo o restante foi testado e se mostrou incompatível ou instável, por isso AVC e outras fontes ficam sempre em decodificação por software.
 
-🎧 Mux de Áudio com libopus:
 
-Faixa única (primeiro áudio do input):
-```bash
-ffmpeg \
-  -i "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv"\
-  -i "/run/media/malk/Downloads/input.mkv" \
-  -map 0:v:0 -c:v copy \
-  -map 1:a:0 -c:a libopus -vbr off -b:a 96k \
-  "/run/media/malk/Downloads/output_qsv_final_q24_opus96k.mkv"
-```
+Explicação dos parâmetros utilizados.
 
-Dual áudio (faixas 0 e 1 do input):
+
+Qualidade e controle:
+
+
+**-preset veryslow**
+
+Uso o preset veryslow porque foi onde o AV1_QSV da Arc A310 realmente começou a extrair eficiência de compressão, presets mais rápidos funcionam mas desperdiçam bitrate em cenas simples e quebram com mais facilidade em cenas complexas, nos testes esse preset entregou o melhor equilíbrio entre tempo de encode e qualidade final.
+
+**-global_quality 24**
+
+Uso o **-global_quality 24** como ponto base porque foi onde consegui manter os arquivos dentro do meu teto de tamanho sem introduzir artefatos evidentes em anime, na prática eu trato cada episódio individualmente e ajusto se necessário, valores mais baixos aumentam demais o tamanho e valores mais altos começam a destruir gradientes, linhas finas e texturas, esse intervalo foi validado episódio por episódio nos testes reais.
+
+**-look_ahead_depth 100**
+
+Defini **-look_ahead_depth 100** porque valores menores fazem o encoder tomar decisões ruins em cenas com cortes rápidos ou mudanças bruscas de complexidade, valores maiores não trouxeram ganho visual proporcional e só aumentaram o custo, esse foi o ponto onde o rate control passou a se comportar de forma previsível.
+
+**-extbrc 1**
+
+Ativei **-extbrc** porque o controle de bitrate padrão do QSV reage mal a cenas difíceis, com extbrc ligado o encoder responde melhor a variações bruscas de complexidade, isso ficou claro em cenas escuras com grão e efeitos.
+
+
+**Estrutura temporal:**
+
+
+**-adaptive_i 1**
+
+Ativei adaptive_i porque sem isso o QSV tende a inserir I-frames de forma desnecessária, com esse parâmetro o encoder só usa I-frame quando há quebra real de continuidade visual, nos testes isso reduziu picos de bitrate inúteis.
+
+**-adaptive_b 1**
+
+Uso **-adaptive_b** porque B-frames fixos não funcionam bem em todo tipo de cena, principalmente em anime com longos trechos estáticos seguidos de movimento rápido, com isso ativo o encoder decide melhor quando usar ou não B-frames.
+
+**-b_strategy 1**
+
+Mantenho **-b_strategy** ligado porque ele permite reorganizar melhor a hierarquia dos B-frames, sem isso a distribuição fica engessada, nos testes o resultado prático foi menos flicker e melhor preservação de detalhes em movimento.
+
+**-bf 8**
+
+Escolhi **-bf 8** porque foi o máximo que trouxe ganho real de compressão sem introduzir instabilidade visual, valores menores desperdiçam potencial do AV1 e valores maiores não mostraram diferença prática nos testes.
+
+**-g 300**
+
+Uso **-g 300** porque anime se beneficia muito de GOP longo, há muita reutilização de informação entre frames, valores menores quebraram eficiência sem trazer ganho real em compatibilidade ou seek.
+
+**-forced_idr 1**
+
+Ativei **-forced_idr** para garantir pontos limpos de recuperação no stream, isso evita problemas de seek e reprodução em players mais sensíveis, nos testes isso foi mais confiável do que deixar tudo automático.
+
+
+**Layout e pipeline:**
+
+
+**-tile_cols 0 -tile_rows 0**
+
+Mantenho tiles explicitamente desativados porque em 1080p e 1440p eles não trouxeram ganho visual nem de compressão, apenas aumentaram overhead, o valor 0 é uma escolha ativa baseada em testes.
+
+**-an**
+
+Removo o áudio nesse estágio porque meu foco aqui é validar exclusivamente o vídeo, isso reduz variáveis e acelera testes, o áudio é tratado depois em um passo separado com Opus.
+
+
+
+**Parâmetros existentes e compatíveis que eu não uso, e o porquê.**
+
+
+**Rate control e bitrate:**
+
+
+**-rc cbr**
+
+Não uso **-rc cbr** porque ele força bitrate constante mesmo quando a cena não precisa, em anime isso desperdiça bits em cenas simples e ainda falha em cenas complexas, o tamanho fica previsível mas a qualidade não
+
+**-rc vbr**
+
+Não uso **-rc vbr** porque apesar de parecer flexível ele ainda tenta seguir metas de bitrate, com teto rígido de tamanho isso ficou menos previsível que **-global_quality**, em vários episódios reagiu tarde demais a picos de complexidade
+
+**-rc icq**
+
+Não uso **-rc icq** porque apesar de funcionar ele se mostrou menos consistente entre episódios do que **-global_quality**, principalmente em cenas escuras, comparei diretamente os dois e mantive o que foi mais previsível no meu cenário
+
+**-maxrate**
+
+Não uso **-maxrate** porque esse parâmetro é voltado para streaming e transmissão, em encode offline para arquivo final ele só limita artificialmente o encoder e pode prejudicar cenas complexas
+
+**-bufsize**
+
+Não uso **-bufsize** pelo mesmo motivo do **-maxrate**, ele existe para controle de buffer em playback contínuo e não trouxe ganho prático nos meus testes
+
+**-qp_i / -qp_p / -qp_b**
+
+Não uso QP manual porque isso quebra a lógica adaptativa do AV1_QSV, quando forcei valores o encoder perdeu capacidade de reagir a mudanças de cena e a qualidade ficou irregular
+
+
+**Hardware e paralelismo:**
+
+
+**-low_power 1**
+
+Não uso **-low_power** porque ele reduz a complexidade interna do encoder para economizar energia, nos testes isso piorou rate control, aumentou banding e perdeu detalhe fino, como meu foco é qualidade final esse modo só atrapalha
+
+**-threads**
+
+Não uso **-threads** porque o QSV ignora esse parâmetro, o paralelismo é gerenciado internamente pela GPU
+
+**-async_depth**
+
+Não uso **-async_depth** porque ele afeta pipeline e latência, não qualidade final, como meus encodes são offline não há benefício prático em mexer nisso
+
+
+**GOP, IDR e scene change:**
+
+
+**-idr_interval**
+
+Não uso **-idr_interval** porque ele tenta impor espaçamento fixo de IDR, isso entra em conflito com GOP longo e -forced_idr, nos testes foi menos estável
+
+**-sc_threshold**
+
+Não uso **-sc_threshold** porque com -look_ahead_depth alto o AV1_QSV já detecta mudanças de cena de forma eficiente, forçar isso gerou decisões piores em transições suaves
+
+
+**Tiles e compatibilidade:**
+
+
+**-tile_cols / -tile_rows**
+
+Não uso tiles ativos porque nas resoluções que trabalho eles não trouxeram benefício real, apenas overhead, esse recurso só começa a fazer sentido em resoluções muito maiores
+
+**-profile / -level**
+
+Não forço **-profile** ou **-level** manualmente porque o AV1_QSV já seleciona valores compatíveis automaticamente, forçar isso não trouxe ganho e pode até quebrar compatibilidade
+
+
+**AQ (Adaptive Quantization)**
+
+
+**-spatial_aq 1**
+
+Não uso -spatial_aq porque ele tenta redistribuir bits com base em complexidade espacial do frame, na prática em anime isso tende a supervalorizar áreas com textura artificial e subvalorizar linhas finas e gradientes, nos meus testes o resultado foi mais variação de qualidade entre cenas e menos previsibilidade no tamanho final
+
+**-temporal_aq 1**
+
+Não uso **-temporal_aq** porque ele redistribui bits com base em variação temporal entre frames, em anime isso nem sempre funciona bem já que muitas cenas têm pouca mudança real mas exigem preservação de detalhe, nos testes esse parâmetro interferiu negativamente no rate control junto com **-look_ahead_depth** alto e **-extbrc ativo**.
+
+**Nota sobre AQ no AV1_QSV**
+
+No meu pipeline o controle adaptativo já é feito de forma mais eficiente através de **-look_ahead_depth** alto, **-extbrc** ativo e B-frames agressivos, adicionar **-spatial_aq** ou **-temporal_aq** acabou criando decisões redundantes ou conflitantes, o resultado prático foi perda de consistência entre episódios e menor controle sobre o teto de tamanho, ou seja, não são parâmetros errados, eles só não se encaixam no meu cenário específico de anime com limite rígido de tamanho e foco em previsibilidade visual
+
+
+
+**Muxagem de áudio.**
+
+**Single‑audio (faixa 0 do input):**
+
+O vídeo já está encodeado em AV1_QSV, aqui apenas adiciono a faixa principal do input usando libopus, ajusto bitrate e VBR para manter tamanho e qualidade previsíveis, o mapeamento do vídeo é feito com -c:v copy para não reencodear, assim o processo é rápido e seguro, qualquer ajuste de idioma ou título de faixa é feito previamente no MKVToolNix.
+
+
 ```bash
 ffmpeg \
   -i "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv" \
   -i "/run/media/malk/Downloads/input.mkv" \
   -map 0:v:0 -c:v copy \
-  -map 1:a:0 -c:a:0 libopus -vbr off -b:a:0 80k -metadata:s:a:0 title="Japonês[Malk]" \
-  -map 1:a:1 -c:a:1 libopus -vbr off -b:a:1 80k -metadata:s:a:1 title="Português[Malk]" \
-  "/run/media/malk/Downloads/output_qsv_dualaudio_q24_opus96k.mkv"
+  -map 1:a:0 -c:a libopus -b:a 96k -vbr constrained \
+  "/run/media/malk/Downloads/output_qsv_final_q24_opus96k.mkv"
 ```
 
-🧠 Notas finais:
-
-* Para fontes AVC (H.264): prefira decodificação por software, QSV para decodificação AVC pode falhar em várias fontes. Use -i input.mkv sem -hwaccel qsv quando a origem for AVC.
-
-* Para HEVC/AV1: decodificação por QSV costuma funcionar bem em Arc. Testei isso no meu setup (Fedora + Arc A310).
-
- * Se a sua fonte for 8→10 bits (ou vice-versa), cuidado com scale_qsv=format=p010 / -pix_fmt yuv420p10le  preserve o formato correto pra evitar banding/desbalanceamento de cores.
-
-* -global_quality é o principal controle de qualidade: experimente na prática (valores típicos que eu testo: ~18 = mais qualidade / pesado, até ~30 = mais compacto). Ajuste pra sua fonte.
-
-* -look_ahead_depth, -adaptive_i, -adaptive_b, -b_strategy, -bf e -extbrc são parâmetros que otimizei pra Arc, podem ser reduzidos se você precisar de encode mais rápido.
-
-* -g 300 e -forced_idr 1 funcionam bem pra controle de GOP em animes/filmes, mas ajuste conforme sua timeline de capítulos/cenas.
-
-* tile_cols / tile_rows ficam em 0 aqui (auto). Em conteúdo muito grande (4K+), testar tiles pode acelerar/ajustar performance.
-
-* Containers: uso MKV por estabilidade com múltiplos áudios/legendas; MP4 pode dar problemas com alguns codec metadata.
-
-* Sempre verifique sua versão do FFmpeg e drivers (OneVPL/iHD). Pequenas versões mudam comportamento do av1_qsv.
-
-* Teste em pequenos cortes primeiro (10–30s) antes de rodar o arquivo inteiro, economiza tempo ao ajustar -global_quality.
-
-* QSV aceita apenas YUV420. Se sua fonte for 4:2:2 ou 4:4:4, faça a conversão antes:
--vf format=yuv420p10le (ou yuv420p para 8-bit).
-
-
-👉 Se quiser, também recomendo dar uma olhada no meu preset pro MPV no Windows:
-
-📺 [Configuração recomendada do mpv no Windows](mpv-config-windows.md)
-
-
-⚠️ Observações sobre decodificação:
-
-No Linux com placas Intel Arc, rolou o seguinte nos testes:
-
-### 🧩 Tabela de suporte à decodificação no Linux com Intel Arc
-
-| Formato de entrada | QSV Funciona? | VAAPI Funciona? | Observações |
-|--------------------|---------------|------------------|-------------|
-| AVC 8-bit          | ❌ Instável   | ⚠️ Apenas reprodução (MPV) | Use `-hwaccel none` |
-| AVC 10-bit         | ❌ Não suportado | ❌ Não suportado | Use `-hwaccel none` |
-| HEVC 8-bit         | ❌ Instável   | Apenas reprodução (MPV)   | Use `-hwaccel none` |
-| HEVC 10-bit        | ✅ Sim        | ✅ Sim         | Ideal para pipelines QSV |
-| AV1 8/10-bit       | ❌ Instável no pipeline QSV    | ❌ Instável no pipeline QSV | Use `-hwaccel none` |
-
-
-Resumo: usando Arc no Linux, o mais seguro e estável é sempre decodificar por software. Use QSV apenas na parte de encode.
-
-Nota: Esses testes foram no Fedora 43 KDE com a Arc A310. No Windows o comportamento pode ser diferente, principalmente com driver Intel oficial.
-
-🤔 Por que AV1 via QSV?
-
-Se quiser entender direitinho o porquê da minha escolha de AV1 com QSV (ao invés de SVT-AV1, HEVC, AVC…), tem um texto separado só pra isso:
-
-👉 [Por que escolhi AV1 com QSV](por-que-av1-qsv.md)
-
-* Nota Final: Todas as informações abaixo foram testadas na prática no Fedora 43 KDE, Fmpeg 7.1.1 e GPU Intel Arc A310. Muitos desses comportamentos não estão, documentados oficialmente, mas foram verificados de forma consistente em, dezenas de encodes.
+**Dual‑audio (faixas 0 e 1 do input):**
 
 ```bash
-# Compatibilidade de Reprodução, Players Recomendados e Metodologia de Testes
-
-Os encodes usam AV1 via QSV, mais leve e rápido que SVT-AV1, com pequena perda de eficiência.
-Como alguns players ainda variam no suporte ao AV1, abaixo estão as recomendações de reprodução.
-
-Android:
-- VLC: funciona direto, simples e confiável.
-- mpv (F-Droid): maior fidelidade, requer ajustes manuais.
-- mpvKt: versão moderna do mpv para Android, reproduz AV1 liso sem configurar nada.
-
-Windows / PC:
-- VLC: compatibilidade ampla.
-- K-Lite Codec Pack (MPC-HC): alternativa intermediária, testado no Positivo Q232B.
-- mpv: player mais fiel ao encode, ideal para validar qualidade.
-
----------------------------------------------------------------------
-
-Metodologia de Testes:
-
-Para garantir compatibilidade ampla, todos os encodes são testados em dois dispositivos modestos:
-
-- Samsung Galaxy A30s: roda AV1 totalmente por software (VLC e mpvKt).
-- Positivo Motion Q232B: notebook simples, formatado com drivers originais.
-
-Se o AV1_QSV roda liso nesses aparelhos, que não possuem aceleração AV1, 
-ele rodará sem problemas em praticamente qualquer hardware atual.
-
+ffmpeg \
+  -i "/run/media/malk/Downloads/output_av1_qsv_ultramax_q24.mkv" \
+  -i "/run/media/malk/Downloads/input.mkv" \
+  -map 0:v:0 -c:v copy \
+  -map 1:a:0 -c:a:0 libopus -b:a:0 80k -vbr:a:0 constrained \
+    -metadata:s:a:0 title="Japonês[Malk]" \
+  -map 1:a:1 -c:a:1 libopus -b:a:1 80k -vbr:a:1 constrained \
+    -metadata:s:a:1 title="Português[Malk]" \
+  "/run/media/malk/Downloads/output_qsv_dualaudio_q24_opus80k.mkv"
 ```
 
+O **-vbr constrained** é usado para manter bitrate e tamanho previsíveis, consistente com o encode de vídeo feito anteriormente, garantindo que o arquivo final não ultrapasse limites de tamanho nem perca qualidade perceptível.
 
-
-
+Nota: FFmpeg só consegue reconhecer idioma se a faixa já tiver metadata correta, por isso eu prefiro nomear e organizar faixas no MKVToolNix antes do mux, assim evito problemas e mantenho flexibilidade, esse método funciona tanto para single quanto para dual audio e garante consistência com o encode de vídeo feito anteriormente.
 
