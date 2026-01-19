@@ -22,6 +22,7 @@ Basta criar ou abrir esse arquivo em qualquer editor de texto, Bloco de Notas, V
 
 Configuração recomendada para Windows (mpv.conf)
 
+```bash
 # Decodificação acelerada por hardware
 
 hwdec=auto
@@ -53,7 +54,7 @@ deband-grain=2
 dither-depth=auto
 temporal-dither=yes
 fbo-format=rgba16f
-
+```
 O que cada parte faz, em resumo
 
 Hwdec=auto usa a aceleração de vídeo disponível na sua placa, Intel, AMD ou Nvidia, se notar problemas de cor, banding estranho ou incompatibilidade, vale testar hwdec=dxva2-copy ou até hwdec=no.
@@ -80,6 +81,7 @@ Configuração equivalente para Linux (mpv.conf)
 
 Abaixo está a configuração completa usada no Linux, mantendo exatamente a mesma filosofia visual, as diferenças existem apenas por causa do backend gráfico e do método de decodificação, não há mudança conceitual.
 
+```bash
 # Decodificação acelerada por hardware
 
 hwdec=vaapi-copy
@@ -117,6 +119,8 @@ fbo-format=rgba16f
 # video-aspect-override=16:9
 
 # video-unscaled=no
+```
+
 
 Observação rápida
 
